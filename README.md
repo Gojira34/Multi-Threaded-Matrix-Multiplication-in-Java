@@ -1,6 +1,7 @@
 # Multi-Threaded-Matrix-Multiplication-in-Java
 
 # Project Description
+Personal Project.
 A program that multiplies two square matrices using multithreading.
 
 # Program Structure
