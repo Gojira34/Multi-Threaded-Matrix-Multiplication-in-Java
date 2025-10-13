@@ -115,27 +115,30 @@ public class MultiThreaded_Matrix_Multiplication {
         System.out.println("Matrix B:");
         printMatrix(matrixB);
        
-        int[][] doneMatrixA;
-        int[][] doneMatrixB;
-        int[][] doneMatrix = new int[1][1];
-        int temp = 0;
-
-        doneMatrixA = colCopyMatrices(matrixA, 0);
-        System.out.println("Col Matrix: ");
-        printMatrix(doneMatrixA);
-        System.out.println();
-        doneMatrixB = rowCopyMatrices(matrixB, 0);
-        System.out.println("Row Matrix: ");
-        printMatrix(doneMatrixB);
         
-        for (int i = 0; i < doneMatrixA.length;) {
-            System.out.println("Starting i:" + i);
-            for (int j = i; j <= i; j++){
-                System.out.println("Starting j:" + j);
-                doneMatrix[0][0] += doneMatrixA[j][0] * doneMatrixB[0][j];
+        
+        for (int k = 0; k < matrixA.length; k++) {
+            int[][] doneMatrixA;
+            int[][] doneMatrixB;
+            int[][] doneMatrix = new int[1][1];
+            int temp = 0;
+
+            doneMatrixA = colCopyMatrices(matrixA, k);
+            System.out.println("Col Matrix: ");
+            printMatrix(doneMatrixA);
+            doneMatrixB = rowCopyMatrices(matrixB, k);
+            System.out.println("Row Matrix: ");
+            printMatrix(doneMatrixB);
+            
+            for (int i = 0; i < doneMatrixA.length;) {
+                System.out.println("Starting i:" + i);
+                for (int j = i; j <= i; j++){
+                    System.out.println("Starting j:" + j);
+                    doneMatrix[0][0] += doneMatrixA[j][0] * doneMatrixB[0][j];
+                }
+                printMatrix(doneMatrix);
+                i++;
             }
-            printMatrix(doneMatrix);
-            i++;
         }
         
     }
@@ -148,6 +151,7 @@ public class MultiThreaded_Matrix_Multiplication {
             }
             System.out.println();
         }
+        System.out.println();
     }
     
     
