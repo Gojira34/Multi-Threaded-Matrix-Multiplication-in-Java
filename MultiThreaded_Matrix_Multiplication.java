@@ -16,10 +16,12 @@ import java.util.Random;
 
 class matrix_multiplication implements Runnable {
     int[][] multiplicationMatrix;
+    int rowToDo;
     
     
-    public matrix_multiplication(int[][] multiplicationMatrix) {
+    public matrix_multiplication(int[][] multiplicationMatrix, int rowToDo, int[][] rowMatrix, int[][] colMatrix) {
         this.multiplicationMatrix = multiplicationMatrix;
+        this.rowToDo = rowToDo;
     }
     
     @Override
@@ -34,15 +36,16 @@ public class MultiThreaded_Matrix_Multiplication {
         
         int[][] matrixA;
         int[][] matrixB;
-        int[][] resMatrix = new int[2][2];
-        int size = 0;
+        int[][] resMatrix;
+        int sizeA = 0;
+        int sizeB = 0;
         int randomMaxValue = 10;
         
         // Getting size for Matrix A
         System.out.print("Enter the size of Matrix A: ");
         if (input.hasNextInt()) {
-            size = input.nextInt();
-            if (size <= 0) {
+            sizeA = input.nextInt();
+            if (sizeA <= 0) {
                 System.out.print("Size must be greater than 0.");
             }
         } else {
@@ -50,13 +53,13 @@ public class MultiThreaded_Matrix_Multiplication {
             input.next();
         }
         
-        matrixA = new int[size][size];
+        matrixA = new int[sizeA][sizeA];
         
         // Getting size for Matrix B
         System.out.print("Enter the size of Matrix B: ");
         if (input.hasNextInt()) {
-            size = input.nextInt();
-            if (size <= 0) {
+            sizeB = input.nextInt();
+            if (sizeB <= 0) {
                 System.out.print("Size must be greater than 0.");
             }
         } else {
@@ -64,7 +67,7 @@ public class MultiThreaded_Matrix_Multiplication {
             input.next();
         }
 
-        matrixB = new int[size][size];
+        matrixB = new int[sizeB][sizeB];
         
         System.out.print("Type '1' to manually enter matrices, or '2' for random: ");
         int choice = input.nextInt();
@@ -106,6 +109,7 @@ public class MultiThreaded_Matrix_Multiplication {
             System.out.println();
         }
 
+        resMatrix = new int[sizeA][sizeA];
         
         // Printing Matrix A
         System.out.println("Matrix A:");
@@ -115,32 +119,33 @@ public class MultiThreaded_Matrix_Multiplication {
         System.out.println("Matrix B:");
         printMatrix(matrixB);
        
-        
-        
-        for (int k = 0; k < matrixA.length; k++) {
-            int[][] doneMatrixA;
-            int[][] doneMatrixB;
-            int[][] doneMatrix = new int[1][1];
-            int temp = 0;
+        int[][] doneMatrix = new int[2][2];
+        int row = 0;
+        for (int o = 0; o < matrixA.length; o++) {
+            for (int i = 0; i < matrixA.length; i++) {
+                int[][] doneMatrixA;
+                int[][] doneMatrixB;
+                int temp = 0;
 
-            doneMatrixA = colCopyMatrices(matrixA, k);
-            System.out.println("Col Matrix: ");
-            printMatrix(doneMatrixA);
-            doneMatrixB = rowCopyMatrices(matrixB, k);
-            System.out.println("Row Matrix: ");
-            printMatrix(doneMatrixB);
-            
-            for (int i = 0; i < doneMatrixA.length;) {
-                System.out.println("Starting i:" + i);
-                for (int j = i; j <= i; j++){
+                doneMatrixA = rowCopyMatrices(matrixA, row);
+                System.out.println("Col Matrix: ");
+                printMatrix(doneMatrixA);
+                doneMatrixB = colCopyMatrices(matrixB, i);
+                System.out.println("Row Matrix: ");
+                printMatrix(doneMatrixB);
+
+                for (int j = 0; j < doneMatrixB.length;) {
                     System.out.println("Starting j:" + j);
-                    doneMatrix[0][0] += doneMatrixA[j][0] * doneMatrixB[0][j];
+                    for (int k = j; k <= j; k++) {
+                        System.out.println("Starting k:" + k);
+                        doneMatrix[o][i] += doneMatrixA[0][k] * doneMatrixB[k][0];
+                    }
+                    printMatrix(doneMatrix);
+                    j++;
                 }
-                printMatrix(doneMatrix);
-                i++;
             }
+            row++;
         }
-        
     }
     
     // meathod to print matrix
