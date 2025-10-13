@@ -7,28 +7,11 @@ import java.util.Scanner;
 import java.util.Random;
 
 /**
- * In this project, you will implement a program that multiplies two square matrices using multithreading.
+ * In this project, you will implement a program that multiplies two square matrices using multi threading.
  * Instead of computing the entire result sequentially, you will create multiple threads where each thread computes a portion of the resulting matrix (for example, one row or a block of rows).
  * The parent thread will coordinate the work, start/join threads, and finally display the resulting matrix.
  * @author Nil Patel
  */
-
-
-class matrix_multiplication implements Runnable {
-    int[][] multiplicationMatrix;
-    int rowToDo;
-    
-    
-    public matrix_multiplication(int[][] multiplicationMatrix, int rowToDo, int[][] rowMatrix, int[][] colMatrix) {
-        this.multiplicationMatrix = multiplicationMatrix;
-        this.rowToDo = rowToDo;
-    }
-    
-    @Override
-    public void run() {
-        
-    }
-}
 
 public class MultiThreaded_Matrix_Multiplication {
     public static void main(String[] args) {
@@ -37,37 +20,25 @@ public class MultiThreaded_Matrix_Multiplication {
         int[][] matrixA;
         int[][] matrixB;
         int[][] resMatrix;
-        int sizeA = 0;
-        int sizeB = 0;
+        int size = 0;
         int randomMaxValue = 10;
         
         // Getting size for Matrix A
-        System.out.print("Enter the size of Matrix A: ");
+        System.out.print("Enter the size of squre Matrix: ");
         if (input.hasNextInt()) {
-            sizeA = input.nextInt();
-            if (sizeA <= 0) {
+            size = input.nextInt();
+            if (size <= 0) {
                 System.out.print("Size must be greater than 0.");
             }
         } else {
             System.out.print("Invalid input. Please enter an integer.");
             input.next();
+            return;
         }
         
-        matrixA = new int[sizeA][sizeA];
-        
-        // Getting size for Matrix B
-        System.out.print("Enter the size of Matrix B: ");
-        if (input.hasNextInt()) {
-            sizeB = input.nextInt();
-            if (sizeB <= 0) {
-                System.out.print("Size must be greater than 0.");
-            }
-        } else {
-            System.out.print("Invalid input. Please enter an integer.");
-            input.next();
-        }
-
-        matrixB = new int[sizeB][sizeB];
+        matrixA = new int[size][size];
+        matrixB = new int[size][size];
+        resMatrix = new int[size][size];
         
         System.out.print("Type '1' to manually enter matrices, or '2' for random: ");
         int choice = input.nextInt();
@@ -107,9 +78,8 @@ public class MultiThreaded_Matrix_Multiplication {
         
         else {
             System.out.println();
+            return;
         }
-
-        resMatrix = new int[sizeA][sizeA];
         
         // Printing Matrix A
         System.out.println("Matrix A:");
@@ -118,8 +88,9 @@ public class MultiThreaded_Matrix_Multiplication {
         // Printing Matrix B
         System.out.println("Matrix B:");
         printMatrix(matrixB);
+        
+        Thread[] threads = new Thread[size];
        
-        int[][] doneMatrix = new int[2][2];
         int row = 0;
         for (int o = 0; o < matrixA.length; o++) {
             for (int i = 0; i < matrixA.length; i++) {
@@ -128,24 +99,23 @@ public class MultiThreaded_Matrix_Multiplication {
                 int temp = 0;
 
                 doneMatrixA = rowCopyMatrices(matrixA, row);
-                System.out.println("Col Matrix: ");
-                printMatrix(doneMatrixA);
                 doneMatrixB = colCopyMatrices(matrixB, i);
-                System.out.println("Row Matrix: ");
-                printMatrix(doneMatrixB);
-
-                for (int j = 0; j < doneMatrixB.length;) {
-                    System.out.println("Starting j:" + j);
-                    for (int k = j; k <= j; k++) {
-                        System.out.println("Starting k:" + k);
-                        doneMatrix[o][i] += doneMatrixA[0][k] * doneMatrixB[k][0];
-                    }
-                    printMatrix(doneMatrix);
-                    j++;
-                }
+                matrix_multiplication thread = new matrix_multiplication(resMatrix, row, doneMatrixA, doneMatrixB);
+                threads[i] = new Thread(thread);
+                threads[i].start();
             }
             row++;
         }
+        
+        // Wait for all threads to finish
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
     
     // meathod to print matrix
@@ -189,5 +159,25 @@ public class MultiThreaded_Matrix_Multiplication {
             matrixCopy[i][0] = matrix[i][colToCopy];
         }
         return matrixCopy;
+    }
+}
+
+class matrix_multiplication implements Runnable {
+    private final int[][] resMatrix;
+    private final int rowToDo;
+    private final int[][] rowMatrix;
+    private final int[][] colMatrix;
+    
+    
+    public matrix_multiplication(int[][] resMatrix, int rowToDo, int[][] rowMatrix, int[][] colMatrix) {
+        this.resMatrix = resMatrix;
+        this.rowToDo = rowToDo;
+        this.rowMatrix = rowMatrix;
+        this.colMatrix = colMatrix;
+    }
+    
+    @Override
+    public void run() {
+        
     }
 }
