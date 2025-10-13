@@ -17,11 +17,11 @@ public class MultiThreaded_Matrix_Multiplication {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         
-        int[][] matrixA;
-        int[][] matrixB;
-        int[][] resMatrix;
-        int size = 0;
-        int randomMaxValue = 10;
+        int[][] matrixA;            // First input matrix
+        int[][] matrixB;            // Second input matrix
+        int[][] resMatrix;          // Result matrix A * B
+        int size = 0;               // Dimension
+        int randomMaxValue = 10;    // Max Random number value for matrix generation
         
         // Getting size for Matrix A
         System.out.print("Enter the size of squre Matrix: ");
@@ -36,14 +36,16 @@ public class MultiThreaded_Matrix_Multiplication {
             return;
         }
         
+        // Initialize matrices once we know the size
         matrixA = new int[size][size];
         matrixB = new int[size][size];
         resMatrix = new int[size][size];
         
+        // Ask user how to fill matrices. manual or random
         System.out.print("Type '1' to manually enter matrices, or '2' for random: ");
         int choice = input.nextInt();
         
-        
+        // for Manual entry
         if (choice == 1) {
             System.out.print("Enter the Matrix A Values: ");
             for (int row = 0; row < matrixA.length; row++) {
@@ -68,10 +70,16 @@ public class MultiThreaded_Matrix_Multiplication {
             }
         }
         
+        // for Random Entry
         else if (choice == 2) {
             System.out.print("What Max Value whould you like for the matrix to have: ");
+            while (!input.hasNextInt()) {
+                System.out.print("Please enter a positive integer: ");
+                input.next();
+                return;
+            }
             randomMaxValue = input.nextInt();
-            
+            if (randomMaxValue < 1) randomMaxValue = 10;
             matrixA = randomMatrices(matrixA, randomMaxValue);
             matrixB = randomMatrices(matrixB, randomMaxValue);
         }
@@ -89,32 +97,30 @@ public class MultiThreaded_Matrix_Multiplication {
         System.out.println("Matrix B:");
         printMatrix(matrixB);
         
+        // Create worker threads
         Thread[] threads = new Thread[size];
        
-        int row = 0;
-        for (int o = 0; o < matrixA.length; o++) {
-            for (int i = 0; i < matrixA.length; i++) {
-                int[][] doneMatrixA;
-                int[][] doneMatrixB;
-                int temp = 0;
-
-                doneMatrixA = rowCopyMatrices(matrixA, row);
-                doneMatrixB = colCopyMatrices(matrixB, i);
-                matrix_multiplication thread = new matrix_multiplication(resMatrix, row, doneMatrixA, doneMatrixB);
-                threads[i] = new Thread(thread);
-                threads[i].start();
-            }
-            row++;
+        // create a worker that will calculate one row of resmatrix
+        for (int i = 0; i < size; i++) {
+            matrix_multiplication worker = new matrix_multiplication(resMatrix, i, matrixA, matrixB, size);
+            threads[i] = new Thread(worker);
+            threads[i].start();
         }
         
         // Wait for all threads to finish
-        for (Thread thread : threads) {
+        for (int i = 0; i < size; i++) {
             try {
-                thread.join();
+                threads[i].join();
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Main thread interrupted while waiting for row threads.");
                 e.printStackTrace();
             }
         }
+        
+        // Print the result matrix
+        System.out.println("Result Matrix: ");
+        printMatrix(resMatrix);
 
     }
     
@@ -143,6 +149,7 @@ public class MultiThreaded_Matrix_Multiplication {
         return matrix;
     }
     
+    // unused kept for learning
     static int[][] rowCopyMatrices (int[][] matrix, int rowToCopy) {
         int[][] matrixCopy = new int[1][matrix.length];
         
@@ -151,7 +158,7 @@ public class MultiThreaded_Matrix_Multiplication {
         }
         return matrixCopy;
     }
-    
+    //unused kept for learning
     static int[][] colCopyMatrices (int[][] matrix, int colToCopy) {
         int[][] matrixCopy = new int[matrix.length][1];
         
@@ -162,22 +169,36 @@ public class MultiThreaded_Matrix_Multiplication {
     }
 }
 
+/**
+ * Runnable task that computes one row of the resulting matrix. Each thread runs
+ * this class's run() method for its assigned row. This avoids data races since
+ * each thread writes to a unique row.
+ */
 class matrix_multiplication implements Runnable {
-    private final int[][] resMatrix;
-    private final int rowToDo;
-    private final int[][] rowMatrix;
-    private final int[][] colMatrix;
+    private final int[][] resMatrix;        // shared result matrix
+    private final int rowToDo;              // which row this thread computes
+    private final int[][] A;                // full matrixA
+    private final int[][] B;                // full matrixB
+    private final int n;                    // matrix size
     
     
-    public matrix_multiplication(int[][] resMatrix, int rowToDo, int[][] rowMatrix, int[][] colMatrix) {
+    public matrix_multiplication(int[][] resMatrix, int rowToDo, int[][] A, int[][] B, int n) {
         this.resMatrix = resMatrix;
         this.rowToDo = rowToDo;
-        this.rowMatrix = rowMatrix;
-        this.colMatrix = colMatrix;
+        this.A = A;
+        this.B = B;
+        this.n = n;
     }
     
     @Override
     public void run() {
-        
+        // For each column in B, compute the dot product of row(rowToDo) of A and column(i) of B
+        for (int i = 0; i < n; i++) {
+            int sum = 0;
+            for (int j = 0; j < n; j++) {
+                sum += A[rowToDo][j] * B[j][i];
+            }
+            resMatrix[rowToDo][i] = sum;
+        }
     }
 }
