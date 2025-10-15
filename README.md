@@ -1,7 +1,7 @@
 # Multi-Threaded-Matrix-Multiplication-in-Java
 
 # Project Description
-Personal Project.
+Personal Project.\
 A program that multiplies two square matrices using multithreading.
 
 # Program Structure
@@ -14,3 +14,5 @@ A program that multiplies two square matrices using multithreading.
 2. MultiplyThread (Worker Class)
    - Implements Runnable.
    - Responsible for computing one row (or block) of result matric.
+
+Finished. Might add a way to compare the Multi-Threaded vs Single-Threaded.
